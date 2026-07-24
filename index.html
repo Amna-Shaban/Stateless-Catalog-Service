@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stateless Catalog Service- Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .form-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; flex: 1; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        ul { list-style: none; padding: 0; }
+        li { background: #f8f9fa; margin-bottom: 8px; padding: 12px; border-radius: 4px; display: flex; justify-content: space-between; border-left: 4px solid #007bff; }
+        .price { font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Product Management Dashboard</h1>
+        
+        <form id="productForm" class="form-group">
+            <input type="text" id="name" placeholder="Product Name" required>
+            <input type="number" step="0.01" id="price" placeholder="Price ($)" required>
+            <button type="submit">Add Product</button>
+        </form>
+
+        <h2>Inventory Items</h2>
+        <ul id="productList"></ul>
+    </div>
+
+    <script>
+        const API_URL = '/api/v1/products';
+
+        async function fetchProducts() {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+            const list = document.getElementById('productList');
+            list.innerHTML = '';
+            data.data.forEach(prod => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${prod.name}</span> <span class="price">$${prod.price.toFixed(2)}</span>`;
+                list.appendChild(li);
+            });
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const price = parseFloat(document.getElementById('price').value);
+
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price })
+            });
+
+            document.getElementById('name').value = '';
+            document.getElementById('price').value = '';
+            fetchProducts();
+        });
+
+        fetchProducts();
+    </script>
+</body>
+</html>
